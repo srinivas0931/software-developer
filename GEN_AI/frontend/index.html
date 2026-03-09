@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CurricuForge – AI Curriculum Generator</title><!-- Element SDK -->
+  <script src="/_sdk/element_sdk.js"></script><!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script><!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script><!-- ==================== STYLE.CSS ==================== -->
+  <style>
+        /* ============================================
+           CurricuForge - AI Curriculum Design System
+           Custom Styles
+           ============================================ */
+
+        /* Base Reset & Dark Theme Foundation */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f0f2f 100%);
+            color: #e0e0ff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animated Particle Canvas Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100%;
+            width: 100%;
+        }
+
+        /* Navigation Bar Styles */
+        .nav-bar {
+            background: rgba(10, 10, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #8b5cf6 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+
+        /* Neon Glow Effects */
+        .neon-border {
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            box-shadow: 
+                0 0 20px rgba(139, 92, 246, 0.2),
+                inset 0 0 20px rgba(139, 92, 246, 0.05);
+        }
+
+        .neon-glow {
+            box-shadow: 
+                0 0 20px rgba(139, 92, 246, 0.4),
+                0 0 40px rgba(139, 92, 246, 0.2),
+                0 0 60px rgba(139, 92, 246, 0.1);
+        }
+
+        /* Form Input Styles */
+        .form-input {
+            background: rgba(20, 20, 50, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #e0e0ff;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+            background: rgba(30, 30, 70, 0.9);
+        }
+
+        .form-input::placeholder {
+            color: rgba(160, 160, 200, 0.6);
+        }
+
+        /* Generate Button - Primary CTA */
+        .generate-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 40px rgba(139, 92, 246, 0.4),
+                0 0 60px rgba(6, 182, 212, 0.3);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Spinner Animation */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Result Container Styles */
+        .result-container {
+            background: rgba(15, 15, 40, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .result-container.success {
+            border-color: rgba(34, 197, 94, 0.5);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .result-container.error {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Curriculum Module Cards */
+        .module-card {
+            background: linear-gradient(135deg, rgba(30, 30, 70, 0.8) 0%, rgba(20, 20, 50, 0.9) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background: rgba(20, 20, 50, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(30, 30, 70, 0.8);
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateY(-5px);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 10, 30, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        /* Pulse Animation for AI Icon */
+        .ai-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        /* Floating Animation */
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Text Gradient Animation */
+        .animated-gradient-text {
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981, #8b5cf6);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: text-gradient 4s ease infinite;
+        }
+
+        @keyframes text-gradient {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem !important;
+            }
+        }
+    </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full"><!-- ==================== INDEX.HTML ==================== --> <!-- Animated Particle Background Canvas -->
+  <canvas id="particle-canvas"></canvas><!-- Main Content Wrapper -->
+  <div class="main-wrapper"><!-- ========== Navigation Bar ========== -->
+   <nav class="nav-bar px-4 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between"><!-- Logo & Brand -->
+     <div class="flex items-center gap-3"><!-- AI Brain Icon SVG -->
+      <div class="ai-pulse">
+       <svg width="40" height="40" viewbox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" stroke="url(#gradient1)" stroke-width="2" fill="rgba(139,92,246,0.1)" /> <circle cx="20" cy="20" r="8" fill="url(#gradient1)" /> <circle cx="20" cy="12" r="3" fill="#06b6d4" /> <circle cx="12" cy="20" r="3" fill="#8b5cf6" /> <circle cx="28" cy="20" r="3" fill="#06b6d4" /> <circle cx="20" cy="28" r="3" fill="#8b5cf6" /> <line x1="20" y1="15" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" /> <line x1="17" y1="20" x2="12" y2="20" stroke="#8b5cf6" stroke-width="2" /> <line x1="23" y1="20" x2="28" y2="20" stroke="#06b6d4" stroke-width="2" /> <line x1="20" y1="25" x2="20" y2="28" stroke="#8b5cf6" stroke-width="2" /> <defs>
+         <lineargradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" />
+          <stop offset="100%" stop-color="#06b6d4" />
+         </lineargradient>
+        </defs>
+       </svg>
+      </div><span class="logo-text text-2xl font-bold">CurricuForge</span>
+     </div><!-- Navigation Links -->
+     <div class="hidden md:flex items-center gap-8"><a href="#generator" class="text-gray-300 hover:text-cyan-400 transition-colors font-medium">Generator</a> <a href="#features" class="text-gray-300 hover:text-cyan-400 transition-colors font-medium">Features</a> <a href="#about" class="text-gray-300 hover:text-cyan-400 transition-colors font-medium">About</a>
+     </div><!-- CTA Button --> <button class="px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"> Get Started </button>
+    </div>
+   </nav><!-- ========== Hero Section ========== -->
+   <section class="px-4 py-16 md:py-24">
+    <div class="max-w-4xl mx-auto text-center"><!-- Floating Badge -->
+     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-900/50 border border-violet-500/30 mb-8 float-animation"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> <span class="text-sm text-violet-200">AI-Powered • Instant Results</span>
+     </div><!-- Main Headline -->
+     <h1 id="hero-title" class="hero-title text-4xl md:text-6xl font-orbitron font-bold mb-6 leading-tight"><span class="text-white">Design Curricula with</span> <br><span class="animated-gradient-text">Generative AI</span></h1><!-- Subtitle -->
+     <p id="hero-subtitle" class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your educational vision into comprehensive, structured curricula in seconds. Powered by cutting-edge AI technology.</p><!-- Stats Row -->
+     <div class="flex flex-wrap justify-center gap-8 mb-12">
+      <div class="text-center">
+       <div class="text-3xl font-bold text-cyan-400">
+        10K+
+       </div>
+       <div class="text-sm text-gray-500">
+        Curricula Generated
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-3xl font-bold text-violet-400">
+        500+
+       </div>
+       <div class="text-sm text-gray-500">
+        Institutions
+       </div>
+      </div>
+      <div class="text-center">
+       <div class="text-3xl font-bold text-emerald-400">
+        98%
+       </div>
+       <div class="text-sm text-gray-500">
+        Satisfaction Rate
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- ========== Curriculum Generator Form ========== -->
+   <section id="generator" class="px-4 py-12">
+    <div class="max-w-3xl mx-auto"><!-- Form Container -->
+     <div class="neon-border rounded-2xl p-8 md:p-10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl"><!-- Form Header -->
+      <div class="text-center mb-8">
+       <h2 class="text-2xl md:text-3xl font-orbitron font-bold text-white mb-2">Curriculum Generator</h2>
+       <p class="text-gray-400">Fill in the details below to generate your AI-powered curriculum</p>
+      </div><!-- Generator Form -->
+      <form id="curriculum-form" class="space-y-6"><!-- Course Name Input -->
+       <div><label for="course-name" class="block text-sm font-semibold text-violet-300 mb-2"> 📚 Course Name </label> <input type="text" id="course-name" name="courseName" placeholder="e.g., Introduction to Machine Learning" class="form-input w-full px-4 py-3 rounded-xl font-medium" required>
+       </div><!-- Education Level Dropdown -->
+       <div><label for="education-level" class="block text-sm font-semibold text-violet-300 mb-2"> 🎓 Education Level </label> <select id="education-level" name="educationLevel" class="form-input w-full px-4 py-3 rounded-xl font-medium cursor-pointer" required> <option value="" disabled selected>Select education level...</option> <option value="elementary">Elementary School (K-5)</option> <option value="middle">Middle School (6-8)</option> <option value="high">High School (9-12)</option> <option value="undergraduate">Undergraduate (College)</option> <option value="graduate">Graduate (Masters)</option> <option value="doctoral">Doctoral (PhD)</option> <option value="professional">Professional Development</option> <option value="bootcamp">Bootcamp / Intensive</option> </select>
+       </div><!-- Course Duration Input -->
+       <div><label for="course-duration" class="block text-sm font-semibold text-violet-300 mb-2"> ⏱️ Course Duration </label> <input type="text" id="course-duration" name="courseDuration" placeholder="e.g., 12 weeks, 1 semester, 40 hours" class="form-input w-full px-4 py-3 rounded-xl font-medium" required>
+       </div><!-- Skills to Include -->
+       <div><label for="skills" class="block text-sm font-semibold text-violet-300 mb-2"> 💡 Skills to Include </label> <textarea id="skills" name="skills" rows="3" placeholder="e.g., Python programming, Data analysis, Neural networks, Model evaluation..." class="form-input w-full px-4 py-3 rounded-xl font-medium resize-none" required></textarea>
+        <p class="text-xs text-gray-500 mt-1">Separate skills with commas</p>
+       </div><!-- Generate Button --> <button type="submit" id="generate-btn" class="generate-btn w-full py-4 rounded-xl text-white font-orbitron font-bold text-lg flex items-center justify-center gap-3"> <span id="btn-text">⚡ Generate Curriculum</span>
+        <div id="btn-spinner" class="spinner hidden"></div></button>
+      </form>
+     </div>
+    </div>
+   </section><!-- ========== Result Container ========== -->
+   <section id="result-section" class="px-4 py-8 hidden">
+    <div class="max-w-4xl mx-auto">
+     <div id="result-container" class="result-container rounded-2xl p-8 md:p-10"><!-- Result content will be injected here by JavaScript -->
+     </div>
+    </div>
+   </section><!-- ========== Features Section ========== -->
+   <section id="features" class="px-4 py-16">
+    <div class="max-w-6xl mx-auto">
+     <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-white mb-4">Why CurricuForge?</h2>
+      <p class="text-gray-400 max-w-2xl mx-auto">Leverage the power of AI to create comprehensive, well-structured curricula tailored to your needs</p>
+     </div><!-- Features Grid -->
+     <div class="grid md:grid-cols-3 gap-6"><!-- Feature 1 -->
+      <div class="feature-card rounded-xl p-6 text-center">
+       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-violet-600 to-violet-800 flex items-center justify-center">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+       </div>
+       <h3 class="text-xl font-bold text-white mb-2">Lightning Fast</h3>
+       <p class="text-gray-400 text-sm">Generate complete curricula in seconds, not hours or days</p>
+      </div><!-- Feature 2 -->
+      <div class="feature-card rounded-xl p-6 text-center">
+       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+       </div>
+       <h3 class="text-xl font-bold text-white mb-2">AI-Powered</h3>
+       <p class="text-gray-400 text-sm">Advanced AI ensures pedagogically sound curriculum structure</p>
+      </div><!-- Feature 3 -->
+      <div class="feature-card rounded-xl p-6 text-center">
+       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+        </svg>
+       </div>
+       <h3 class="text-xl font-bold text-white mb-2">Customizable</h3>
+       <p class="text-gray-400 text-sm">Tailor curricula to specific education levels and skills</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- ========== About Section ========== -->
+   <section id="about" class="px-4 py-16 border-t border-violet-900/30">
+    <div class="max-w-4xl mx-auto text-center">
+     <h2 class="text-2xl md:text-3xl font-orbitron font-bold text-white mb-4">Built for Educators, By Innovators</h2>
+     <p class="text-gray-400 mb-8 leading-relaxed">CurricuForge combines cutting-edge generative AI with educational best practices to help educators, institutions, and training organizations create comprehensive curricula in minutes instead of weeks.</p>
+     <div class="flex justify-center gap-4 flex-wrap"><span class="px-4 py-2 rounded-full bg-violet-900/50 border border-violet-500/30 text-violet-300 text-sm"> 🤖 GPT-4 Powered </span> <span class="px-4 py-2 rounded-full bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 text-sm"> 📊 Standards Aligned </span> <span class="px-4 py-2 rounded-full bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-sm"> 🎯 Outcome-Based </span>
+     </div>
+    </div>
+   </section><!-- ========== Footer ========== -->
+   <footer class="px-4 py-8 border-t border-violet-900/30 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+     <div class="flex items-center gap-2"><span class="logo-text text-lg font-bold">CurricuForge</span> <span class="text-gray-500 text-sm">© 2024</span>
+     </div>
+     <p class="text-gray-500 text-sm">🚀 Built for Hackathon Demo • Powered by Generative AI</p>
+    </div>
+   </footer>
+  </div><!-- ==================== SCRIPT.JS ==================== -->
+  <script>
+        /* ============================================
+           CurricuForge - JavaScript Application Logic
+           ============================================ */
+
+        // ========== Configuration & Default Values ==========
+        const defaultConfig = {
+            hero_title: 'Design Curricula with Generative AI',
+            hero_subtitle: 'Transform your educational vision into comprehensive, structured curricula in seconds. Powered by cutting-edge AI technology.',
+            button_text: '⚡ Generate Curriculum',
+            primary_color: '#0a0a1a',
+            secondary_color: '#1e1e46',
+            text_color: '#e0e0ff',
+            accent_color: '#8b5cf6',
+            cta_color: '#06b6d4',
+            font_family: 'Inter',
+            font_size: 16
+        };
+
+        // ========== Particle Animation System ==========
+        class ParticleSystem {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.particleCount = 100;
+                this.init();
+            }
+
+            // Initialize canvas and particles
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.createParticles();
+                this.animate();
+            }
+
+            // Handle canvas resize
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            // Create particle objects with random properties
+            createParticles() {
+                this.particles = [];
+                for (let i = 0; i < this.particleCount; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        radius: Math.random() * 2 + 0.5,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        opacity: Math.random() * 0.5 + 0.2,
+                        color: Math.random() > 0.5 ? '#8b5cf6' : '#06b6d4'
+                    });
+                }
+            }
+
+            // Update particle positions
+            update() {
+                this.particles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+
+                    // Wrap particles around screen edges
+                    if (particle.x < 0) particle.x = this.canvas.width;
+                    if (particle.x > this.canvas.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = this.canvas.height;
+                    if (particle.y > this.canvas.height) particle.y = 0;
+                });
+            }
+
+            // Draw particles and connections
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw connecting lines between nearby particles
+                this.particles.forEach((p1, i) => {
+                    this.particles.slice(i + 1).forEach(p2 => {
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < 150) {
+                            this.ctx.beginPath();
+                            this.ctx.strokeStyle = `rgba(139, 92, 246, ${0.1 * (1 - distance / 150)})`;
+                            this.ctx.lineWidth = 0.5;
+                            this.ctx.moveTo(p1.x, p1.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.stroke();
+                        }
+                    });
+                });
+
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.globalAlpha = particle.opacity;
+                    this.ctx.fill();
+                    this.ctx.globalAlpha = 1;
+                });
+            }
+
+            // Animation loop
+            animate() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // ========== Form Handler & API Integration ==========
+        class CurriculumGenerator {
+            constructor() {
+                this.form = document.getElementById('curriculum-form');
+                this.generateBtn = document.getElementById('generate-btn');
+                this.btnText = document.getElementById('btn-text');
+                this.btnSpinner = document.getElementById('btn-spinner');
+                this.resultSection = document.getElementById('result-section');
+                this.resultContainer = document.getElementById('result-container');
+                this.apiEndpoint = 'http://localhost:8000/generate-curriculum';
+                
+                this.init();
+            }
+
+            init() {
+                // Attach form submission handler
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+            }
+
+            // Handle form submission
+            async handleSubmit(event) {
+                event.preventDefault();
+                
+                // Collect form data
+                const formData = {
+                    courseName: document.getElementById('course-name').value,
+                    educationLevel: document.getElementById('education-level').value,
+                    courseDuration: document.getElementById('course-duration').value,
+                    skills: document.getElementById('skills').value.split(',').map(s => s.trim())
+                };
+
+                // Validate form data
+                if (!this.validateForm(formData)) {
+                    return;
+                }
+
+                // Show loading state
+                this.setLoading(true);
+
+                try {
+                    // Send POST request to backend API
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.displayResult(data, formData);
+
+                } catch (error) {
+                    console.error('API Error:', error);
+                    // Display demo result if API is unavailable (for hackathon demo)
+                    this.displayDemoResult(formData);
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            // Validate form inputs
+            validateForm(data) {
+                if (!data.courseName || !data.educationLevel || !data.courseDuration || data.skills.length === 0) {
+                    this.showToast('Please fill in all fields', 'error');
+                    return false;
+                }
+                return true;
+            }
+
+            // Toggle loading state
+            setLoading(isLoading) {
+                this.generateBtn.disabled = isLoading;
+                this.btnText.textContent = isLoading ? 'Generating...' : (window.elementSdk?.config?.button_text || defaultConfig.button_text);
+                this.btnSpinner.classList.toggle('hidden', !isLoading);
+            }
+
+            // Display API result
+            displayResult(data, formData) {
+                this.resultSection.classList.remove('hidden');
+                this.resultContainer.classList.add('success');
+                this.resultContainer.classList.remove('error');
+                
+                // Render curriculum modules
+                this.resultContainer.innerHTML = this.generateResultHTML(data, formData);
+                
+                // Smooth scroll to results
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Generate demo result (for hackathon when API unavailable)
+            displayDemoResult(formData) {
+                const demoData = this.generateDemoData(formData);
+                this.displayResult(demoData, formData);
+                this.showToast('Demo mode: Showing sample curriculum', 'info');
+            }
+
+            // Generate demo curriculum data
+            generateDemoData(formData) {
+                const moduleCount = Math.min(Math.max(4, formData.skills.length), 8);
+                const modules = [];
+                
+                for (let i = 0; i < moduleCount; i++) {
+                    const skill = formData.skills[i % formData.skills.length] || 'Core Concepts';
+                    modules.push({
+                        title: `Module ${i + 1}: ${skill}`,
+                        duration: `Week ${i + 1}`,
+                        topics: [
+                            `Introduction to ${skill}`,
+                            `${skill} Fundamentals`,
+                            `Practical ${skill} Applications`,
+                            `${skill} Assessment`
+                        ],
+                        learningOutcomes: [
+                            `Understand core concepts of ${skill}`,
+                            `Apply ${skill} in real-world scenarios`,
+                            `Evaluate and analyze ${skill} effectiveness`
+                        ]
+                    });
+                }
+
+                return {
+                    courseName: formData.courseName,
+                    educationLevel: formData.educationLevel,
+                    duration: formData.courseDuration,
+                    modules: modules,
+                    assessment: {
+                        formative: ['Weekly quizzes', 'Lab exercises', 'Peer reviews'],
+                        summative: ['Midterm project', 'Final capstone project', 'Portfolio submission']
+                    }
+                };
+            }
+
+            // Generate HTML for result display
+            generateResultHTML(data, formData) {
+                return `
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/50 border border-green-500/30 text-green-400 text-sm mb-4">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Curriculum Generated Successfully
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-orbitron font-bold text-white mb-2">
+                            ${data.courseName || formData.courseName}
+                        </h3>
+                        <p class="text-gray-400">
+                            ${this.formatEducationLevel(data.educationLevel || formData.educationLevel)} • ${data.duration || formData.courseDuration}
+                        </p>
+                    </div>
+                    
+                    <div class="grid gap-4 mb-8">
+                        ${data.modules.map((module, index) => `
+                            <div class="module-card rounded-xl p-6">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                        <span class="font-orbitron font-bold text-white">${index + 1}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <h4 class="text-lg font-bold text-white">${module.title}</h4>
+                                            <span class="px-2 py-1 rounded-full bg-cyan-900/50 text-cyan-400 text-xs">${module.duration}</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <p class="text-sm text-violet-300 font-semibold mb-1">Topics:</p>
+                                            <ul class="text-sm text-gray-400 space-y-1">
+                                                ${module.topics.map(topic => `<li class="flex items-center gap-2"><span class="text-cyan-400">▸</span> ${topic}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-violet-300 font-semibold mb-1">Learning Outcomes:</p>
+                                            <ul class="text-sm text-gray-400 space-y-1">
+                                                ${module.learningOutcomes.map(outcome => `<li class="flex items-center gap-2"><span class="text-green-400">✓</span> ${outcome}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-6 rounded-xl bg-violet-900/30 border border-violet-500/30">
+                            <h4 class="font-bold text-white mb-3 flex items-center gap-2">
+                                <span class="text-violet-400">📝</span> Formative Assessment
+                            </h4>
+                            <ul class="space-y-2 text-sm text-gray-300">
+                                ${data.assessment.formative.map(item => `<li class="flex items-center gap-2"><span class="text-violet-400">•</span> ${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="p-6 rounded-xl bg-cyan-900/30 border border-cyan-500/30">
+                            <h4 class="font-bold text-white mb-3 flex items-center gap-2">
+                                <span class="text-cyan-400">🏆</span> Summative Assessment
+                            </h4>
+                            <ul class="space-y-2 text-sm text-gray-300">
+                                ${data.assessment.summative.map(item => `<li class="flex items-center gap-2"><span class="text-cyan-400">•</span> ${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                        <button onclick="window.print()" class="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold transition-colors">
+                            📄 Export as PDF
+                        </button>
+                        <button onclick="document.getElementById('curriculum-form').reset(); document.getElementById('result-section').classList.add('hidden');" class="px-6 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-colors">
+                            🔄 Generate New
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Format education level for display
+            formatEducationLevel(level) {
+                const levels = {
+                    elementary: 'Elementary School',
+                    middle: 'Middle School',
+                    high: 'High School',
+                    undergraduate: 'Undergraduate',
+                    graduate: 'Graduate',
+                    doctoral: 'Doctoral',
+                    professional: 'Professional',
+                    bootcamp: 'Bootcamp'
+                };
+                return levels[level] || level;
+            }
+
+            // Show toast notification (inline, no alert())
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                const colors = {
+                    info: 'bg-cyan-900/90 border-cyan-500',
+                    error: 'bg-red-900/90 border-red-500',
+                    success: 'bg-green-900/90 border-green-500'
+                };
+                
+                toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl ${colors[type]} border backdrop-blur-xl text-white font-medium z-50 transform transition-all duration-300 translate-y-full opacity-0`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-full', 'opacity-0');
+                }, 10);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    toast.classList.add('translate-y-full', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // ========== Element SDK Integration ==========
+        async function initializeSDK() {
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    
+                    // Handle configuration changes
+                    onConfigChange: async (config) => {
+                        const heroTitle = document.getElementById('hero-title');
+                        const heroSubtitle = document.getElementById('hero-subtitle');
+                        const btnText = document.getElementById('btn-text');
+                        
+                        // Update hero section text
+                        if (heroTitle) {
+                            heroTitle.innerHTML = `<span class="text-white">Design Curricula with</span><br><span class="animated-gradient-text">Generative AI</span>`;
+                            const titleText = config.hero_title || defaultConfig.hero_title;
+                            if (titleText !== defaultConfig.hero_title) {
+                                heroTitle.innerHTML = `<span class="text-white">${titleText.split(' ').slice(0, 3).join(' ')}</span><br><span class="animated-gradient-text">${titleText.split(' ').slice(3).join(' ') || 'AI'}</span>`;
+                            }
+                        }
+                        
+                        if (heroSubtitle) {
+                            heroSubtitle.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+                        }
+                        
+                        if (btnText && !document.getElementById('generate-btn').disabled) {
+                            btnText.textContent = config.button_text || defaultConfig.button_text;
+                        }
+                        
+                        // Apply font styling
+                        const fontFamily = config.font_family || defaultConfig.font_family;
+                        const fontSize = config.font_size || defaultConfig.font_size;
+                        document.body.style.fontFamily = `${fontFamily}, Inter, sans-serif`;
+                        document.body.style.fontSize = `${fontSize}px`;
+                        
+                        // Apply color theming
+                        const primaryColor = config.primary_color || defaultConfig.primary_color;
+                        const accentColor = config.accent_color || defaultConfig.accent_color;
+                        document.body.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${config.secondary_color || defaultConfig.secondary_color} 50%, ${primaryColor} 100%)`;
+                    },
+                    
+                    // Map configuration to capabilities
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            {
+                                get: () => config.primary_color || defaultConfig.primary_color,
+                                set: (value) => window.elementSdk.setConfig({ primary_color: value })
+                            },
+                            {
+                                get: () => config.secondary_color || defaultConfig.secondary_color,
+                                set: (value) => window.elementSdk.setConfig({ secondary_color: value })
+                            },
+                            {
+                                get: () => config.text_color || defaultConfig.text_color,
+                                set: (value) => window.elementSdk.setConfig({ text_color: value })
+                            },
+                            {
+                                get: () => config.accent_color || defaultConfig.accent_color,
+                                set: (value) => window.elementSdk.setConfig({ accent_color: value })
+                            },
+                            {
+                                get: () => config.cta_color || defaultConfig.cta_color,
+                                set: (value) => window.elementSdk.setConfig({ cta_color: value })
+                            }
+                        ],
+                        borderables: [],
+                        fontEditable: {
+                            get: () => config.font_family || defaultConfig.font_family,
+                            set: (value) => window.elementSdk.setConfig({ font_family: value })
+                        },
+                        fontSizeable: {
+                            get: () => config.font_size || defaultConfig.font_size,
+                            set: (value) => window.elementSdk.setConfig({ font_size: value })
+                        }
+                    }),
+                    
+                    // Map to edit panel values
+                    mapToEditPanelValues: (config) => new Map([
+                        ['hero_title', config.hero_title || defaultConfig.hero_title],
+                        ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
+                        ['button_text', config.button_text || defaultConfig.button_text]
+                    ])
+                });
+            }
+        }
+
+        // ========== Initialize Application ==========
+        // Initialize SDK first
+        initializeSDK();
+
+        // Initialize particle system when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start particle animation
+            const canvas = document.getElementById('particle-canvas');
+            new ParticleSystem(canvas);
+            
+            // Initialize curriculum generator
+            new CurriculumGenerator();
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d8f3ca48035f82b',t:'MTc3Mjk0NTYxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
+
+ </script>
+ </body>
+</html>
